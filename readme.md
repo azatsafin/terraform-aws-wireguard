@@ -5,6 +5,8 @@ Bring up wireguard (WG) server and necessary lambda functions for managing wg us
 - Access AWS resources by internal names.
 - Internet access, Wireguard server will perform NAT/packet forwarding
 - You could add remove users to WG by adding or remove them from IAM group
+- People how do setup can specify email address which will receive all WG clients configs 
+- Can show WG client config by Invoke Lambda function
 
 ## Inputs
 | Name  | Description | Type  | Default  | Required  |
