@@ -113,7 +113,7 @@ module "wg_manage" {
     WG_LISTEN_PORT         = var.listen-port
     WG_INSTANCE_ID         = local.wg_ssm_instance_id
     WG_PUBLIC_IP           = aws_eip.ec2_vpn_instance.public_ip
-    VPC_CIDR               = module.vpc.vpc_cidr_block
+    VPC_CIDR               = var.vpc_id != null ? data.aws_vpc.existed[0].cidr_block : module.vpc.vpc_cidr_block
     WG_IS_SEND_CLIENT_CONF = var.wg_admin_email != null ? true : false
     WG_ADMIN_EMAIL         = var.wg_admin_email
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
@@ -130,7 +130,7 @@ module "wg_manage_image" {
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
   create_ecr_repo = true
   ecr_repo        = "${local.name}-wg-manage"
-  image_tag       = filesha256("../../lambdas/wg-manage/app.py")
+  image_tag       = filesha256("${path.module}/lambdas/wg-manage/app.py")
   source_path     = "${path.module}/lambdas/wg-manage"
 }
 

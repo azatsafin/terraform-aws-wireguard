@@ -138,7 +138,7 @@ def create_new_wg_conf():
     wg_conf.add_attr(None, 'Address', server_ip + "/" + str(ipaddress.IPv4Network(wg_subnet).prefixlen))
     wg_conf.add_attr(None, 'ListenPort', wg_listen_port)
     # Construct internal dns server address
-    vpc_dns_address = (ipaddress.IPv4Network('10.11.0.0/16').network_address + 2).__str__()
+    vpc_dns_address = (ipaddress.IPv4Network(vpc_cidr).network_address + 2).__str__()
     # Following section needed to use internal AWS DNS,
     # this enable access to AWS resources by the names which doesn't have external resolution/IP
     wg_conf.add_attr(None, 'PostUp', 'iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; '

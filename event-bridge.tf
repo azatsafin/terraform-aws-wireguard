@@ -10,13 +10,13 @@ module "eventbridge" {
       description = "Trigger wg-manage lambda"
       event_pattern = jsonencode(
         {
-          "source" : ["aws.iam"],
-          "detail-type" : ["AWS API Call via CloudTrail"],
-          "detail" : {
-            "eventSource" : ["iam.amazonaws.com"],
+          "source": ["aws.iam"],
+          "detail-type": ["AWS API Call via CloudTrail"],
+          "detail": {
+            "eventSource": ["iam.amazonaws.com"],
             "eventName" : ["AddUserToGroup", "RemoveUserFromGroup"],
-            "requestParameters" : {
-              "groupName" : [var.wg_group_name]
+            "requestParameters": {
+              "groupName": [var.wg_group_name]
             }
           }
         }
