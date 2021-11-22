@@ -76,7 +76,7 @@ def add_users(iam_users, ssm_users, users2add, wg_conf):
             wg_conf_user.add_attr(None, 'Address', address.__str__() + "/32")
             wg_conf_user.add_attr(None, 'DNS', (ipaddress.IPv4Network(wg_subnet).network_address + 1).__str__())
             wg_conf_user.add_peer(server_public_key)
-            wg_conf_user.add_attr(server_public_key, 'AllowedIPs', wg_routed_subnets +
+            wg_conf_user.add_attr(server_public_key, 'AllowedIPs', wg_routed_subnets + ", " +
                                   str(ipaddress.IPv4Network(wg_subnet).network_address + 1))
             wg_conf_user.add_attr(server_public_key, 'Endpoint', str(wg_public_ip) + ":" + wg_listen_port)
             user_conf["ClientConf"] = "{}".format("\n".join(wg_conf_user.lines))
