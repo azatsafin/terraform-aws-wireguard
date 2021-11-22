@@ -55,6 +55,12 @@ variable "vpn_subnet" {
   type = string
 }
 
+variable "wg_routed_subnets" {
+  default = "0.0.0.0/0"
+  description = "Comma separated list of subnets to which client can send traffic trough VPN"
+  type = string
+}
+
 variable "wg_admin_email" {
   default = null
   type = string

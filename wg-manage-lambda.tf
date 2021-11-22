@@ -117,6 +117,7 @@ module "wg_manage" {
     WG_IS_SEND_CLIENT_CONF = var.wg_admin_email != null ? true : false
     WG_ADMIN_EMAIL         = var.wg_admin_email
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
+    WG_ROUTED_SUBNETS      = var.wg_routed_subnets
   }
   allowed_triggers = {
     AllowExecutionFromSNS = {

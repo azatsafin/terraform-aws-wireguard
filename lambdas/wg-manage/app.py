@@ -23,6 +23,7 @@ vpc_cidr = os.getenv('VPC_CIDR')
 wg_is_send_client_conf = os.getenv('WG_IS_SEND_CLIENT_CONF')
 wg_admin_email = os.getenv('WG_ADMIN_EMAIL')
 wg_send_lambda_name = os.getenv('WG_SEND_LAMBDA_NAME')
+wg_routed_subnets = os.getenv('WG_ROUTED_SUBNETS')
 
 
 def get_iam_group_membership():
@@ -75,7 +76,8 @@ def add_users(iam_users, ssm_users, users2add, wg_conf):
             wg_conf_user.add_attr(None, 'Address', address.__str__() + "/32")
             wg_conf_user.add_attr(None, 'DNS', (ipaddress.IPv4Network(wg_subnet).network_address + 1).__str__())
             wg_conf_user.add_peer(server_public_key)
-            wg_conf_user.add_attr(server_public_key, 'AllowedIPs', "0.0.0.0/0")
+            wg_conf_user.add_attr(server_public_key, 'AllowedIPs', wg_routed_subnets +
+                                  str(ipaddress.IPv4Network(wg_subnet).network_address + 1))
             wg_conf_user.add_attr(server_public_key, 'Endpoint', str(wg_public_ip) + ":" + wg_listen_port)
             user_conf["ClientConf"] = "{}".format("\n".join(wg_conf_user.lines))
             new_ssm_param = aws_ssm.put_parameter(
@@ -139,18 +141,24 @@ def create_new_wg_conf():
     wg_conf.add_attr(None, 'ListenPort', wg_listen_port)
     # Construct internal dns server address
     vpc_dns_address = (ipaddress.IPv4Network(vpc_cidr).network_address + 2).__str__()
+    # Set which subnets must be passed trough NAT, for simpler explanation enable routing for, by default 0.0.0.0/0
+    nat_rules = ""
+    for rule in wg_routed_subnets.replace(" ", "").split(","):
+        nat_rules = nat_rules + "iptables -t nat -A POSTROUTING -d {0} -o ens5 -j MASQUERADE; ".format(rule)
     # Following section needed to use internal AWS DNS,
     # this enable access to AWS resources by the names which doesn't have external resolution/IP
-    wg_conf.add_attr(None, 'PostUp', 'iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; '
-                                     'iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADE; '
+    wg_conf.add_attr(None, 'PostUp', 'iptables -A FORWARD -i %i -j ACCEPT; '
+                                     'iptables -A FORWARD -o %i -j ACCEPT; '
+                                     '{1}'
                                      'iptables -A PREROUTING -t nat -i %i -p udp --dport 53  -j DNAT --to-destination {0}; '
-                                     'iptables -A PREROUTING -t nat -i %i -p tcp --dport 53  -j DNAT --to-destination {0}'.format(
-        vpc_dns_address))
-    wg_conf.add_attr(None, 'PostDown', 'iptables -D FORWARD -i %.i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; '
-                                       'iptables -t nat -D POSTROUTING -o ens5 -j MASQUERADE; '
+                                     'iptables -A PREROUTING -t nat -i %i -p tcp --dport 53  -j DNAT --to-destination {0}'
+                     .format(vpc_dns_address, nat_rules))
+    wg_conf.add_attr(None, 'PostDown', 'iptables -D FORWARD -i %.i -j ACCEPT; '
+                                       'iptables -D FORWARD -o %i -j ACCEPT; '
+                                       '{1}'
                                        'iptables -D PREROUTING -t nat -i %i -p udp --dport 53  -j DNAT --to-destination {0}; '
-                                       'iptables -D PREROUTING -t nat -i %i -p tcp --dport 53  -j DNAT --to-destination {0}'.format(
-        vpc_dns_address))
+                                       'iptables -D PREROUTING -t nat -i %i -p tcp --dport 53  -j DNAT --to-destination {0}'.
+                     format(vpc_dns_address, nat_rules))
     return wg_conf
 
 
