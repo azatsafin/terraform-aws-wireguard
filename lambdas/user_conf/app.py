@@ -11,16 +11,19 @@ wg_config_ssm_path = os.getenv('WG_SSM_CONFIG_PATH')
 wg_listen_port = os.getenv('WG_LISTEN_PORT')
 
 def handler(event, context):
-    if 'user' in event:
-        try:
-            user_config = aws_ssm.get_parameter(Name=user_ssm_prefix + "/" + str(event['user']), WithDecryption=True)
-            return(json.loads(user_config['Parameter']['Value'])['ClientConf'])
-        except ClientError as e:
-            logging.error("Received error: %s", e, exc_info=True)
-            # Only worry about a specific service error code
-            if e.response['Error']['Code'] == 'ParameterNotFound':
-                return('User {0}: not exist/or not member of wireguard group'.format(event['user']))
-    else:
-        return("'user' parametr must be provided")
-
-
+    # Getting caller identity
+    try:
+        user_arn = event['requestContext']['authorizer']['iam']['userArn']
+    except Exception as e:
+        print(e)
+        return ("'can't get caller identity")
+    # Getting user config by user name
+    try:
+        user_name = user_arn.split(":")[-1].split("/")[-1]
+        user_config = aws_ssm.get_parameter(Name=user_ssm_prefix + "/" + str(user_name), WithDecryption=True)
+        return (json.loads(user_config['Parameter']['Value'])['ClientConf'])
+    except ClientError as e:
+        logging.error("Received error: %s", e, exc_info=True)
+        # Only worry about a specific service error code
+        if e.response['Error']['Code'] == 'ParameterNotFound':
+            return ('User {0}: not exist/or not member of wireguard group'.format(user_arn))

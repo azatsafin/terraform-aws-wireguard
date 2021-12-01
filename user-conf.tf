@@ -85,3 +85,32 @@ module "create_user_conf" {
 }
 
 
+module "api_gateway" {
+  source = "terraform-aws-modules/apigateway-v2/aws"
+
+  name                   = "${local.name}-get-conf"
+  description            = "API for getting wg config"
+  protocol_type          = "HTTP"
+  create_api_domain_name = false
+  default_route_settings = {
+    detailed_metrics_enabled = true
+    throttling_burst_limit   = 100
+    throttling_rate_limit    = 100
+  }
+
+  integrations = {
+    "GET /wg-conf" = {
+      lambda_arn             = module.create_user_conf.lambda_function_arn
+      payload_format_version = "2.0"
+      authorization_type     = "AWS_IAM"
+    }
+  }
+}
+
+resource "aws_lambda_permission" "lambda_permission" {
+  statement_id  = "AllowAPIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${local.name}-create-user-conf"
+  principal     = "apigateway.amazonaws.com"
+  source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*/*"
+}
