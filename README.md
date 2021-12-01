@@ -34,8 +34,10 @@ All kind of deployments will create Lambdas, EC2, Params in SSM, SNS topic, Even
 ### Minimal example
 Minimal example requires no arguments provided. Additionally it will create VPC, and necessary subnets. To retrieve client configurations, you could manually check SSM Params by AWS Web Console, or use bash command provided by TF output. 
 
-After tf apply you need to add user to Wireguard group, wait 1 minute and execute command below.
-```aws --region=${local.region} lambda invoke --function-name ${module.create_user_conf.lambda_function_name} --payload '{"user": "user_name" }' --cli-binary-format raw-in-base64-out lambda-out.txt && cat lambda-out.txt | jq -r  > wg.conf && rm lambda-out.txt```
+After tf apply you need to add user to Wireguard group, wait 1 minute and then wg user can get his wg config file by calling api gateway or executing following script.
+```
+python3 ./scripts/apigateway-invoke.py ${module.api_gateway.apigatewayv2_api_api_endpoint }/wg-conf > wg-conf.conf
+```
 This command will put wg.conf file in current folder, just import it with wireguard client.
 
 ### existing-vpc
