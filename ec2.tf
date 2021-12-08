@@ -152,11 +152,13 @@ module "ec2_vpn_instance" {
 apt-get update
 apt-get install -y awscli jq wireguard iptables
 sleep 5
+systemctl stop wg-quick@wg0.service
 REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
 aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.Value > /etc/wireguard/wg0.conf
 sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 sysctl -p
 sleep 20
+systemctl enable wg-quick@wg0.service
 systemctl start wg-quick@wg0.service
 systemctl status wg-quick@wg0.service
 rm /var/lib/cloud/instances/*/sem/config_scripts_user || true
