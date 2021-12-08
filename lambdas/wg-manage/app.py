@@ -153,7 +153,7 @@ def create_new_wg_conf():
                                      'iptables -A PREROUTING -t nat -i %i -p udp --dport 53  -j DNAT --to-destination {0}; '
                                      'iptables -A PREROUTING -t nat -i %i -p tcp --dport 53  -j DNAT --to-destination {0}'
                      .format(vpc_dns_address, nat_rules))
-    wg_conf.add_attr(None, 'PostDown', 'iptables -D FORWARD -i %.i -j ACCEPT; '
+    wg_conf.add_attr(None, 'PostDown', 'iptables -D FORWARD -i %i -j ACCEPT; '
                                        'iptables -D FORWARD -o %i -j ACCEPT; '
                                        '{1}'
                                        'iptables -D PREROUTING -t nat -i %i -p udp --dport 53  -j DNAT --to-destination {0}; '
