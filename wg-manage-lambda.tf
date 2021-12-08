@@ -90,6 +90,7 @@ resource "aws_iam_role_policy_attachment" "wg_manage" {
 }
 
 module "wg_manage" {
+  handler         = var.users_management_type == "iam" ? "app.handler" : "cognito_app.handler"
   source          = "terraform-aws-modules/lambda/aws"
   version         = "2.7.0"
   create_package  = false
@@ -118,6 +119,7 @@ module "wg_manage" {
     WG_ADMIN_EMAIL         = var.wg_admin_email
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
     WG_ROUTED_SUBNETS      = var.wg_routed_subnets
+    COGNITO_GROUP_NAME     = var.cognito_user_group
   }
   allowed_triggers = {
     AllowExecutionFromSNS = {
