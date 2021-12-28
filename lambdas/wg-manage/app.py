@@ -27,14 +27,27 @@ wg_routed_subnets = os.getenv('WG_ROUTED_SUBNETS')
 
 
 def get_iam_group_membership():
-    try:
-        iam_group_members = aws_iam.get_group(GroupName=iam_group)['Users']
-    except Exception as e:
-        return None
-    iam_group_usernames = []
-    for user in iam_group_members:
-        iam_group_usernames.append(user['UserName'])
-    return iam_group_usernames
+    def get_next_item(Marker):
+        if Marker is None:
+            request_params = {
+                "GroupName": iam_group
+            }
+        else:
+            request_params = {
+                "GroupName": iam_group,
+                "Marker": Marker
+            }
+        iam_users = []
+        try:
+            iam_users_resp = aws_iam.get_group(**request_params)
+        except Exception as e:
+            return None
+        for user in iam_users_resp['Users']:
+            iam_users.append(user['UserName'])
+        if 'Marker' in iam_users_resp:
+            iam_users += get_next_item(iam_users_resp['Marker'])
+        return iam_users
+    return get_next_item(None)
 
 
 def get_ssm_attrs(ssm_path):
@@ -49,15 +62,31 @@ def get_ssm_attrs(ssm_path):
 
 
 def get_existing_users():
-    ssm_user_list = aws_ssm.get_parameters_by_path(Path=user_ssm_prefix, Recursive=False,
-                                                   WithDecryption=True)
-    ssm_user_names = []
-    if 'Parameters' in ssm_user_list:
-        for user in ssm_user_list['Parameters']:
-            ssm_user_names.append(user['Name'].split('/')[-1])
-        return ssm_user_names
-    else:
-        return None
+    def get_next_item(next_token):
+        if next_token is None:
+            request_params = {
+                "Path": user_ssm_prefix,
+                "Recursive": False,
+                "WithDecryption": True
+            }
+        else:
+            request_params = {
+                "Path": user_ssm_prefix,
+                "Recursive": False,
+                "WithDecryption": True,
+                "NextToken": next_token
+            }
+        ssm_users = []
+        try:
+            ssm_users_resp = aws_ssm.get_parameters_by_path(**request_params)
+        except Exception as e:
+            return None
+        for user in ssm_users_resp['Parameters']:
+            ssm_users.append(user['Name'].split('/')[-1])
+        if 'NextToken' in ssm_users_resp:
+            ssm_users += get_next_item(ssm_users_resp['NextToken'])
+        return ssm_users
+    return get_next_item(None)
 
 
 def add_users(iam_users, ssm_users, users2add, wg_conf):
@@ -89,7 +118,7 @@ def add_users(iam_users, ssm_users, users2add, wg_conf):
                 Tier='Standard',
                 DataType='text'
             )
-            if wg_is_send_client_conf:
+            if wg_is_send_client_conf == 'true':
                 payload = {"user": user, "client_config": user_conf["ClientConf"]}
                 try:
                     aws_lambda.invoke(
