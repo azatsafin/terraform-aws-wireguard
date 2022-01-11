@@ -13,14 +13,13 @@ wg_listen_port = os.getenv('WG_LISTEN_PORT')
 def handler(event, context):
     # Getting caller identity
     try:
-        user_arn = event['requestContext']['authorizer']['iam']['userArn']
+        username = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
     except Exception as e:
         print(e)
         return ("'can't get caller identity")
     # Getting user config by user name
     try:
-        user_name = user_arn.split(":")[-1].split("/")[-1]
-        user_config = aws_ssm.get_parameter(Name=user_ssm_prefix + "/" + str(user_name), WithDecryption=True)
+        user_config = aws_ssm.get_parameter(Name=user_ssm_prefix + "/" + str(username), WithDecryption=True)
         return (json.loads(user_config['Parameter']['Value'])['ClientConf'])
     except ClientError as e:
         logging.error("Received error: %s", e, exc_info=True)

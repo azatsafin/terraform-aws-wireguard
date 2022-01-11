@@ -47,7 +47,9 @@ def get_cognito_group_membership(group_name):
         cognito_group_members = []
         try:
             cognito_group_members_resp = aws_cognito.list_users_in_group(**request_params)
+            print(cognito_group_members_resp)
         except Exception as e:
+            print(e)
             return None
         for user in cognito_group_members_resp['Users']:
             cognito_group_members.append(user['Username'])
@@ -90,8 +92,8 @@ def get_existing_users():
         return None
 
 
-def add_users(users, ssm_users, users2add, wg_conf):
-    remaining_users = set(ssm_users).intersection(iam_users)
+def add_users(ssm_users, users2add, wg_conf, cognito_users):
+    remaining_users = set(ssm_users).intersection(cognito_users)
     available_ips = free_ip(remaining_users)
     #print("Number of available IPs:{}".format(len(available_ips)))
     if len(available_ips) > 0:
@@ -228,8 +230,9 @@ def restart_instance():
 
 
 def handler(event, context):
-    users = get_cognito_group_membership()
-    print("Cognito group {} users:{}".format(cognito_group, users))
+    users = get_cognito_group_membership(cognito_group)
+    print("Cognito group name {}".format(cognito_group))
+    print("Cognito group:{} members:{}".format(cognito_group, users))
     ssm = get_existing_users()
     print("Existing users in SSM:{}".format(ssm))
     if users is not None and ssm is not None:
@@ -241,8 +244,8 @@ def handler(event, context):
         if len(users2remove) > 0:
             remove_users(users2remove)
         if len(users2add) > 0:
-            add_users(iam, ssm, users2add, wg_conf)
-        wg_conf_new = add_users_to_wg_config(wg_conf, iam)
+            add_users(ssm, users2add, wg_conf, users)
+        wg_conf_new = add_users_to_wg_config(wg_conf, users)
         aws_ssm.put_parameter(
             Name=wg_config_ssm_path,
             Description='Wireguard server conf',

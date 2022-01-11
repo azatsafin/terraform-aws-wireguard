@@ -83,9 +83,30 @@ resource "aws_iam_policy" "wg_manage" {
 }
 POLICY
 }
+resource "aws_iam_policy" "wg_manage_cognito" {
+  count = var.users_management_type == "cognito" != null ? 1 : 0
+  policy = <<POLICY
+{
+"Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "cognito-idp:ListUsersInGroup",
+            "Resource": "${ var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.arn}"
+        }
+    ]
+}
+POLICY
+}
 
 resource "aws_iam_role_policy_attachment" "wg_manage" {
   policy_arn = aws_iam_policy.wg_manage.arn
+  role       = aws_iam_role.wg_manage.name
+}
+
+resource "aws_iam_role_policy_attachment" "wg_manage_cognito" {
+  count = var.users_management_type == "cognito" != null ? 1 : 0
+  policy_arn = aws_iam_policy.wg_manage_cognito[0].arn
   role       = aws_iam_role.wg_manage.name
 }
 
@@ -120,6 +141,7 @@ module "wg_manage" {
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
     WG_ROUTED_SUBNETS      = var.wg_routed_subnets
     COGNITO_GROUP_NAME     = var.cognito_user_group
+    COGNITO_USER_POOL_ID = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : data.aws_cognito_user_pool_clients.cognito[0].id
   }
   allowed_triggers = {
     AllowExecutionFromSNS = {
@@ -133,7 +155,11 @@ module "wg_manage_image" {
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
   create_ecr_repo = true
   ecr_repo        = "${local.name}-wg-manage"
-  image_tag       = filesha256("${path.module}/lambdas/wg-manage/app.py")
-  source_path     = "${path.module}/lambdas/wg-manage"
+  image_tag       = var.users_management_type == "iam" ? filesha256("${path.module}/lambdas/wg-manage-iam/app.py") : filesha256("${path.module}/lambdas/wg-manage-cognito/app.py")
+  source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : "${path.module}/lambdas/wg-manage-cognito"
 }
 
+data "aws_cognito_user_pool_clients" "cognito" {
+  count = var.users_management_type == "cognito" ? 1 : 0
+  user_pool_id = module.wg_cognito_user_pool.id
+}
