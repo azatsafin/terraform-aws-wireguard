@@ -141,7 +141,7 @@ module "wg_manage" {
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
     WG_ROUTED_SUBNETS      = var.wg_routed_subnets
     COGNITO_GROUP_NAME     = var.cognito_user_group
-    COGNITO_USER_POOL_ID = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : data.aws_cognito_user_pool_clients.cognito[0].id
+    COGNITO_USER_POOL_ID = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
   }
   allowed_triggers = {
     AllowExecutionFromSNS = {
@@ -161,5 +161,5 @@ module "wg_manage_image" {
 
 data "aws_cognito_user_pool_clients" "cognito" {
   count = var.users_management_type == "cognito" ? 1 : 0
-  user_pool_id = module.wg_cognito_user_pool.id
+  user_pool_id = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
 }

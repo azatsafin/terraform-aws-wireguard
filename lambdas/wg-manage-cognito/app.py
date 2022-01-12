@@ -81,15 +81,31 @@ def get_ssm_attrs(ssm_path):
 
 
 def get_existing_users():
-    ssm_user_list = aws_ssm.get_parameters_by_path(Path=user_ssm_prefix, Recursive=False,
-                                                   WithDecryption=True)
-    ssm_user_names = []
-    if 'Parameters' in ssm_user_list:
-        for user in ssm_user_list['Parameters']:
-            ssm_user_names.append(user['Name'].split('/')[-1])
-        return ssm_user_names
-    else:
-        return None
+    def get_next_item(next_token):
+        if next_token is None:
+            request_params = {
+                "Path": user_ssm_prefix,
+                "Recursive": False,
+                "WithDecryption": True
+            }
+        else:
+            request_params = {
+                "Path": user_ssm_prefix,
+                "Recursive": False,
+                "WithDecryption": True,
+                "NextToken": next_token
+            }
+        ssm_users = []
+        try:
+            ssm_users_resp = aws_ssm.get_parameters_by_path(**request_params)
+        except Exception as e:
+            return None
+        for user in ssm_users_resp['Parameters']:
+            ssm_users.append(user['Name'].split('/')[-1])
+        if 'NextToken' in ssm_users_resp:
+            ssm_users += get_next_item(ssm_users_resp['NextToken'])
+        return ssm_users
+    return get_next_item(None)
 
 
 def add_users(ssm_users, users2add, wg_conf, cognito_users):
@@ -121,17 +137,6 @@ def add_users(ssm_users, users2add, wg_conf, cognito_users):
                 Tier='Standard',
                 DataType='text'
             )
-            if wg_is_send_client_conf:
-                payload = {"user": user, "client_config": user_conf["ClientConf"]}
-                try:
-                    aws_lambda.invoke(
-                        FunctionName=wg_send_lambda_name,
-                        InvocationType='Event',
-                        LogType='None',
-                        Payload=json.dumps(payload),
-                    )
-                except Exception as e:
-                    print("Can't invoke {} lambda function".format(wg_send_lambda_name))
     else:
         return False
     return True

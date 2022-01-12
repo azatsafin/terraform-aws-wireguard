@@ -47,6 +47,11 @@ module "api_gateway_cognito" {
       payload_format_version = "2.0"
       integration_type       = "AWS_PROXY"
     }
+    "GET /config" = {
+      lambda_arn             = module.redirect_2cognito[0].lambda_function_arn
+      payload_format_version = "2.0"
+      integration_type       = "AWS_PROXY"
+    }
   }
 }
 
@@ -71,11 +76,20 @@ resource "aws_lambda_permission" "create_user_conf" {
   source_arn    = var.users_management_type == "iam" ? "${module.api_gateway_iam[0].apigatewayv2_api_execution_arn}/*/*/*" : "${module.api_gateway_cognito[0].apigatewayv2_api_execution_arn}/*/*/*"
 }
 
-resource "aws_lambda_permission" "lambda_permission" {
+resource "aws_lambda_permission" "cognito-auth-redirect" {
   count         = var.users_management_type == "cognito" ? 1 : 0
   statement_id  = "AllowAPIInvoke"
   action        = "lambda:InvokeFunction"
   function_name = "${local.name}-cognito-auth-redirect"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${module.api_gateway_cognito[0].apigatewayv2_api_execution_arn}/*/*/*"
+}
+
+resource "aws_lambda_permission" "redirect_2cognito" {
+  count         = var.users_management_type == "cognito" ? 1 : 0
+  statement_id  = "AllowAPIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${local.name}-redirect-2cognito"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${module.api_gateway_cognito[0].apigatewayv2_api_execution_arn}/*/*/*"
 }

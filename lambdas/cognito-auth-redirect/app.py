@@ -42,8 +42,6 @@ def client_html():
     return html
 
 def handler(event, context):
-    print(event)
-    print(context)
     return {
         "statusCode": 200,
         "body": client_html(),

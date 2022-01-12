@@ -25,6 +25,6 @@ module "aws-wireguard" {
   users_management_type = "cognito"
 }
 
-#output "get_config_command" {
-#  value = module.aws-wireguard.get_conf_command
-#}
+output "get_config_url" {
+  value = module.aws-wireguard.get_conf_url
+}
