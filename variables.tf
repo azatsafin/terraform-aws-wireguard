@@ -10,7 +10,7 @@ EOT
 
 variable "cognito_user_pool_id" {
   default = null
-  type = bool
+  type = string
   description = "If you already have existing Cognito user pool, please provide it id, otherwise new pool will be created"
 }
 
