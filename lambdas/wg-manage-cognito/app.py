@@ -145,7 +145,7 @@ def add_users(ssm_users, users2add, wg_conf, cognito_users):
 def remove_users(users):
     for user in users:
         print("Removing ssm param for user:{}".format(user))
-        aws_ssm.delete_parameter(Name=user_ssm_prefix + "/" + user)
+        #aws_ssm.delete_parameter(Name=user_ssm_prefix + "/" + user)
     return True
 
 
