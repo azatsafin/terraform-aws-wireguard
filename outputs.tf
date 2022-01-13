@@ -9,5 +9,5 @@ EOT
 
 output "get_conf_url" {
   description = "If you are using Cognito, endusers can obtain their wireguard configuration by open this url"
-  value = "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/config"
+  value = var.users_management_type == 'cognito' ? "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/config" : null
 }

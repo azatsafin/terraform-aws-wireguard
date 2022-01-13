@@ -37,6 +37,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "cognito_auth_redirect" {
+  count  = var.users_management_type == "cognito" ? 1 : 0
   policy_arn = aws_iam_policy.cognito_auth_redirect[0].arn
   role       = aws_iam_role.cognito_auth_redirect[0].name
 }

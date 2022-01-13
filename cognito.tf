@@ -1,7 +1,7 @@
 module "wg_cognito_user_pool" {
   source  = "lgallard/cognito-user-pool/aws"
   user_pool_name = "${local.name}-wg-user-pool"
-  enabled =  var.cognito_user_pool_id == null ? true : false
+  enabled =  var.cognito_user_pool_id == null && var.users_management_type == "cognito" ? true : false
   tags = {
     Owner       = "infra"
     Environment = "production"
