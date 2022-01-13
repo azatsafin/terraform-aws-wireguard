@@ -1,12 +1,12 @@
 resource "aws_iam_role" "wg_manage" {
-  name = "${local.name}-wg-manage"
+  name               = "${local.name}-wg-manage"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Sid       = ""
         Principal = {
           Service = "lambda.amazonaws.com"
         }
@@ -84,7 +84,7 @@ resource "aws_iam_policy" "wg_manage" {
 POLICY
 }
 resource "aws_iam_policy" "wg_manage_cognito" {
-  count = var.users_management_type == "cognito" != null ? 1 : 0
+  count  = var.users_management_type == "cognito" != null ? 1 : 0
   policy = <<POLICY
 {
 "Version": "2012-10-17",
@@ -105,7 +105,7 @@ resource "aws_iam_role_policy_attachment" "wg_manage" {
 }
 
 resource "aws_iam_role_policy_attachment" "wg_manage_cognito" {
-  count = var.users_management_type == "cognito" != null ? 1 : 0
+  count      = var.users_management_type == "cognito" != null ? 1 : 0
   policy_arn = aws_iam_policy.wg_manage_cognito[0].arn
   role       = aws_iam_role.wg_manage.name
 }
@@ -141,9 +141,9 @@ module "wg_manage" {
     WG_SEND_LAMBDA_NAME    = "${local.name}-send-wg-conf"
     WG_ROUTED_SUBNETS      = var.wg_routed_subnets
     COGNITO_GROUP_NAME     = var.cognito_user_group
-    COGNITO_USER_POOL_ID = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
+    COGNITO_USER_POOL_ID   = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
   }
-  allowed_triggers = {
+  allowed_triggers      = {
     AllowExecutionFromSNS = {
       principal  = "sns.amazonaws.com"
       source_arn = aws_sns_topic.wireguard_group_change_notification.arn
@@ -160,6 +160,6 @@ module "wg_manage_image" {
 }
 
 data "aws_cognito_user_pool_clients" "cognito" {
-  count = var.users_management_type == "cognito" ? 1 : 0
+  count        = var.users_management_type == "cognito" ? 1 : 0
   user_pool_id = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
 }
