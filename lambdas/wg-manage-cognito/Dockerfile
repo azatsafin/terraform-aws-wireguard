@@ -7,7 +7,7 @@ RUN curl -o /etc/yum.repos.d/jdoss-wireguard-epel-7.repo \
 RUN yum install -y wireguard-dkms wireguard-tools
 
 # Copy function code
-COPY app.py ${LAMBDA_TASK_ROOT}
+COPY *.py ./
 RUN find . -type f -exec chmod 755 {} \;
 # Install the function's dependencies using file requirements.txt
 # from your project folder.

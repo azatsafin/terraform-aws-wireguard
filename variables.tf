@@ -1,3 +1,25 @@
+variable "users_management_type" {
+  default     = "iam"
+  description = <<-EOT
+This module support two user managment source, IAM and Cognito
+IAM is more usable for the infrastructure teams, where all members already have IAM user
+Cognito is more usable for the teams who would like to manage VPN outside of IAM, and it more user friendly
+EOT
+  type = string
+}
+
+variable "cognito_user_pool_id" {
+  default = null
+  type = bool
+  description = "If you already have existing Cognito user pool, please provide it id, otherwise new pool will be created"
+}
+
+variable "cognito_user_group" {
+  default = "vpn"
+  type = string
+  description = "only members on this group will have vpn access, default members will not be able to receive config/use vpn"
+}
+
 variable "instance_type" {
   default     = "t3.small"
   description = "Instance type which will be used by Wireguard VPN server, please note - it should have enhanced network support"

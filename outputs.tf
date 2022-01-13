@@ -1,9 +1,13 @@
 output "get_conf_command" {
-  description = <<-EOT
-  Getting configuration for specific user, the user determined by user creds,
-  so we are expecting aws user access key and secret key or aws profile exposed as env variables
-EOT
+  description = "Getting configuration for specific user"
   value       = <<-EOT
-python3 ./scripts/apigateway-invoke.py ${module.api_gateway.apigatewayv2_api_api_endpoint }/wg-conf > wg-conf.conf
+  aws --region=${local.region} lambda invoke --function-name ${module.create_user_conf.lambda_function_name} \
+--payload '{ "user": "you_aws_username" }' --cli-binary-format raw-in-base64-out lambda-out.txt \
+&& cat lambda-out.txt | jq -r  > wg.conf && rm lambda-out.txt
 EOT
+}
+
+output "get_conf_url" {
+  description = "If you are using Cognito, endusers can obtain their wireguard configuration by open this url"
+  value = "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/config"
 }
