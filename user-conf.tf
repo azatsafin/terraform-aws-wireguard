@@ -1,3 +1,6 @@
+locals {
+  wg_cognito_user_pool_arn = var.cognito_user_pool_id != null ?  "arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${var.cognito_user_pool_id}" : module.wg_cognito_user_pool.arn
+}
 resource "aws_iam_role" "create_user_conf" {
   name               = "${local.name}-create-user-conf"
   assume_role_policy = jsonencode({
@@ -70,7 +73,7 @@ resource "aws_iam_policy" "get_config_cognito" {
             "Action": [
                 "cognito-idp:AdminListGroupsForUser"
             ],
-            "Resource": "${ var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.arn}"
+            "Resource": "${local.wg_cognito_user_pool_arn}"
         },
         {
             "Effect": "Allow",

@@ -92,7 +92,7 @@ resource "aws_iam_policy" "wg_manage_cognito" {
         {
             "Effect": "Allow",
             "Action": "cognito-idp:ListUsersInGroup",
-            "Resource": "${ var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.arn}"
+            "Resource": "${local.wg_cognito_user_pool_arn}"
         }
     ]
 }
