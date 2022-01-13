@@ -84,7 +84,7 @@ resource "aws_iam_policy" "wg_manage" {
 POLICY
 }
 resource "aws_iam_policy" "wg_manage_cognito" {
-  count  = var.users_management_type == "cognito" != null ? 1 : 0
+  count  = var.users_management_type == "cognito" ? 1 : 0
   policy = <<POLICY
 {
 "Version": "2012-10-17",
@@ -105,7 +105,7 @@ resource "aws_iam_role_policy_attachment" "wg_manage" {
 }
 
 resource "aws_iam_role_policy_attachment" "wg_manage_cognito" {
-  count      = var.users_management_type == "cognito" != null ? 1 : 0
+  count      = var.users_management_type == "cognito" ? 1 : 0
   policy_arn = aws_iam_policy.wg_manage_cognito[0].arn
   role       = aws_iam_role.wg_manage.name
 }
