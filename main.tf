@@ -4,6 +4,15 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.71.0"
+    }
+  }
+}
+
 #This provider will be used to configure EventBridge,
 # EventBridge consume CloudWatch events from region where IAM events logged, send them to SNS->Lambda
 provider "aws" {
