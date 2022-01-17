@@ -132,7 +132,7 @@ resource "aws_eip" "ec2_vpn_instance" {
 
 module "ec2_vpn_instance" {
   source                      = "terraform-aws-modules/ec2-instance/aws"
-  version                     = "~> 3.0"
+  version                     = "~> v3.3.0"
   iam_instance_profile        = aws_iam_instance_profile.ec2_vpn_server.name
   associate_public_ip_address = true
   name                        = "${local.name}-vpn-server"
