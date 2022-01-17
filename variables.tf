@@ -91,3 +91,15 @@ If specified, this email will receive  wireguard configurations for all clients.
 Configurations will be send by AWS SES. Please make sure that SES out of sandbox or admin email verified.
 EOT
 }
+
+variable "cognito_call_back_app_url" {
+  default = null
+  type = string
+  description = <<-EOT
+You can set your own domain name for call back url in cognito app client settings.
+It's not required to touch this if you don't use your own domain name or your own application.
+For example, you can setup human suitable domain name for get config url, like "vpn.example.com" instead of using
+api gateway execution url "https://aws-generated-unic-name.execute-api.aws-region.amazonaws.com". To do so, you need
+to specify this domain name here and then add Custom Domain name in API Gateway settings.
+EOT
+}
