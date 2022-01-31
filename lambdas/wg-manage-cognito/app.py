@@ -260,4 +260,4 @@ def handler(event, context):
             Tier='Standard',
             DataType='text'
         )
-    print("WG EC2 Instance restart:{}".format(restart_instance()))
+    #print("WG EC2 Instance restart:{}".format(restart_instance()))

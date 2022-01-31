@@ -17,7 +17,7 @@ variable "cognito_user_pool_id" {
 variable "cognito_user_group" {
   default = "vpn"
   type = string
-  description = "only members on this group will have vpn access, default members will not be able to receive config/use vpn"
+  description = "Only members on this group will have vpn access, default members will not be able to receive config/use vpn"
 }
 
 variable "instance_type" {
