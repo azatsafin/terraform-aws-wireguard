@@ -43,7 +43,7 @@ IAM management type details (old method, inconvenient for users):
 
 ## Examples 
 
-###Cognito
+### Cognito
 Deploy module in existing VPN and Subnet. User management type set to cognito. Module will create ec2 instance with installed services: Wireguard and config updater. Cognito user pool, Cognito app client and necessary lambda functions. 
 
 ### Minimal example
@@ -58,4 +58,4 @@ This command will put wg.conf file in current folder, just import it with wiregu
 ### existing-vpc
 Deploy only default resources, all dependencies must be provided explicitly.
 
-###Enjoy, please feel free to create Issues if you face some bugs or obstacles. 
+### Enjoy, please feel free to create Issues if you face some bugs or obstacles. 
