@@ -182,6 +182,58 @@ systemctl enable wg-quick@wg0.service
 systemctl start wg-quick@wg0.service
 systemctl status wg-quick@wg0.service
 rm /var/lib/cloud/instances/*/sem/config_scripts_user || true
+###Setup script to reload WG config
+mkdir -p /var/usr/wg-check-reload
+cd /var/usr/wg-check-reload
+cat > is_reload.sh << 'EOF'
+#!/bin/bash
+#Get cofig from SSM and compare it with the local config, if SSM has newest version of config - update config and reload service
+#Set period of time tolerant to config modification in seconds
+GRACE_PERIOD=100
+REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}')
+SSM_LAST_MODIFIED_TIME=$(aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.LastModifiedDate | sed -r  's/([0-9]+).([0-9]*)/\1/')
+#echo "Last time config modified in SSM:"$SSM_LAST_MODIFIED_TIME
+LOCAL_LAST_MODIFIED_TIME=$(stat -c%Z /etc/wireguard/wg0.conf)
+#echo "Last time local config modification:"$LOCAL_LAST_MODIFIED_TIME
+TIME_DIFF=$(expr $SSM_LAST_MODIFIED_TIME - $LOCAL_LAST_MODIFIED_TIME )
+#echo "Time diff:"$TIME_DIFF
+if [[  $TIME_DIFF -ge $GRACE_PERIOD ]]
+then
+    echo "SSM config is newer, reloading WG..."
+	aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.Value > /etc/wireguard/wg0.conf
+	wg syncconf wg0 <(wg-quick strip /etc/wireguard/wg0.conf)
+else
+	echo "config is pretty new or latest"
+fi
+EOF
+chmod 755 ./is_reload.sh
+###Create Systemd Unit to reload wg when config updated
+cat > /etc/systemd/system/wg-conf-check-reload.service << 'EOF'
+[Unit]
+Description=Check WG conf
+After=syslog.target network.target
+
+[Service]
+Type=oneshot
+ExecStart=/var/usr/wg-check-reload/is_reload.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+cat > /etc/systemd/system/wg-conf-check-reload.timer << 'EOF'
+[Unit]
+Description=Logs some system statistics to the systemd journal
+Requires=wg-conf-check-reload.service
+
+[Timer]
+Unit=wg-conf-check-reload.service
+OnCalendar=*:0/5
+
+[Install]
+WantedBy=timers.target
+EOF
+systemctl daemon-reload
+systemctl start wg-conf-check-reload.timer
 EOT
 }
 

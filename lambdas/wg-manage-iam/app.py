@@ -251,4 +251,7 @@ def handler(event, context):
             Tier='Standard',
             DataType='text'
         )
-    print("WG EC2 Instance restart:{}".format(restart_instance()))
+    #Old method to update config, you can prefer to use it if you require immediate config update but tolerate instance restart,
+    #during restart - all existing user will lost connection to VPN
+    #print("WG EC2 Instance restart:{}".format(restart_instance()))
+

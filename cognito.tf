@@ -43,10 +43,10 @@ module "wg_cognito_user_pool" {
 }
 
 resource "aws_cognito_user_pool_client" "wg-vpn" {
-  count                                = var.cognito_user_pool_id !=0 && var.users_management_type == "cognito" ? 1 : 0
+  count                                = var.users_management_type == "cognito" ? 1 : 0
   name                                 = "VPN authorizer"
   generate_secret                      = true
-  user_pool_id                         = var.cognito_user_pool_id
+  user_pool_id                         = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
   callback_urls                        = [
     var.cognito_call_back_app_url != null ? "https://${var.cognito_call_back_app_url}/cognito-auth-redirect" : "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/cognito-auth-redirect"
   ]
