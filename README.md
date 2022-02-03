@@ -10,14 +10,14 @@ Common specifications:
 - Access AWS resources by internal names.
 - Internet access, Wireguard server will perform NAT/packet forwarding 
 - You can limit subnets to which user will get access, usable when you need to provide VPN access to specific resource instead of routing all traffic via VPN server
-- Admin can setup email address which will receive all WG clients configs
+- Admin can setup email address which will receive all WG clients configs when user added
 - User client configurations and wg server config stored in AWS SSM param
-- EC2 VPN instance has special service to update it WG config when change happens
+- EC2 VPN instance has special service to reload WG config when users added/removed
 
 Cognito management type details (currently supported):
-- You could add remove users to WG by adding or remove them from Cognito group, user should be active member of Cognito user pool
+- You could add remove users to WG by managing it in Cognito group, user should be active member of Cognito user pool
 - Module can create new Cognito user pool, or you can use existing cognito pool. If you use existing pool, new app client will be created in existing pool.
-- Users can get their config by calling URL provided with 'get_conf_url' module output. When user call URL, it will get redirect to Cognito UI for authentication, after successful authentication it will be redirected to API Gateway and mapped Lambda function. Lambda function will generate user config if it not yet exist, and update WG configuration.
+- Users can get their config by calling URL provided with 'get_conf_url' module output. When user call URL, it will get redirect to Cognito UI for authentication, after successful authentication it will be redirected to API Gateway and mapped Lambda function. Lambda function will generate user config if it not yet exist, and update WG configuration and display Wireguard  client configuration in browser. 
 
 IAM management type details (old method, inconvenient for users):
 - You could add remove users to WG by adding or remove them from IAM group
