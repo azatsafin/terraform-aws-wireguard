@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      version = "~>3.59.0"
+      version = "~>3.71.0"
       source  = "hashicorp/aws"
     }
   }
@@ -19,10 +19,10 @@ module "aws-wireguard" {
   aws_ec2_key      = "asafin"
   prefix           = "wg"
   project-name     = "dev"
-  vpc_id           = "vpc-d89be5b0"
-  wireguard_subnet = "subnet-abb5f5c2"
+  vpc_id           = "vpc-0c65a293f10f88001"
+  wireguard_subnet = "subnet-0a0f68dd1b5c8d695"
   vpn_subnet       = "10.11.12.0/24"
-  wg_admin_email = "azsafin@provectus.com"
+  users_management_type = "iam"
 }
 
 output "get_config_command" {

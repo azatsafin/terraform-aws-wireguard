@@ -51,7 +51,7 @@ Minimal example requires no arguments provided, it will create VPC, necessary su
 
 After tf apply you need to add user to Wireguard group, wait 1 minute and then wg user can get his wg config file by calling api gateway or executing following script.
 ```
-python3 ./scripts/apigateway-invoke.py ${module.api_gateway.apigatewayv2_api_api_endpoint }/wg-conf > wg-conf.conf
+python3 ./scripts/apigateway-invoke.py ${module.api_gateway.apigatewayv2_api_api_endpoint }/wg-conf-iam > wg-conf.conf
 ```
 This command will put wg.conf file in current folder, just import it with wireguard client.
 

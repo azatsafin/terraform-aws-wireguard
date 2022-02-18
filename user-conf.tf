@@ -19,6 +19,7 @@ resource "aws_iam_role" "create_user_conf" {
 }
 
 resource "aws_iam_policy" "create_user_conf" {
+  name = "${local.name}-create_user_conf"
   policy = <<POLICY
 {
 "Version": "2012-10-17",
@@ -51,6 +52,20 @@ resource "aws_iam_policy" "create_user_conf" {
                 "logs:PutLogEvents"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetGroup"
+            ],
+            "Resource": "arn:aws:iam::${local.account}:group/${var.wg_group_name}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Resource": "${module.wg_manage.lambda_function_arn}"
         }
     ]
 }
@@ -63,6 +78,7 @@ resource "aws_iam_role_policy_attachment" "create_user_conf" {
 }
 
 resource "aws_iam_policy" "get_config_cognito" {
+  name = "${local.name}-get_config_cognito"
   count  = var.users_management_type == "cognito" ? 1 : 0
   policy = <<POLICY
 {
