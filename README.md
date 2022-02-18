@@ -44,18 +44,11 @@ IAM management type details (old method, inconvenient for users):
 ## Examples 
 
 ### Cognito
-Deploy module in existing VPN and Subnet. User management type set to cognito. Module will create ec2 instance with installed services: Wireguard and config updater. Cognito user pool, Cognito app client and necessary lambda functions. 
+Deploy module in existing VPC and Subnet. User management type set to cognito. Module will create ec2 instance with installed services: Wireguard and config updater. Cognito user pool, Cognito app client and necessary lambda functions. To get client Wireguard configuration just open in browser url provided in browser, you will be redirected to Cognito UI authorization page and after successful authorization return valid configuration file.
 
-### Minimal example
-Minimal example requires no arguments provided, it will create VPC, necessary subnets and all necessary lambda functions. To retrieve client configurations, you could manually check SSM Params by AWS Web Console, or use bash command provided by TF output. 
+### IAM example
+The same as above, but manage VPN user based on IAM group membership. To get Wireguard you need to run python  "python3 .scripts/apigateway-invoke.py api-gateway-invoke-url/config", this script will get you current aws credentials and then call ApiGateway with your credentials, if you have access to VPN script return Wireguard client config. 
 
-After tf apply you need to add user to Wireguard group, wait 1 minute and then wg user can get his wg config file by calling api gateway or executing following script.
-```
-python3 ./scripts/apigateway-invoke.py ${module.api_gateway.apigatewayv2_api_api_endpoint }/wg-conf-iam > wg-conf.conf
-```
-This command will put wg.conf file in current folder, just import it with wireguard client.
-
-### existing-vpc
-Deploy only default resources, all dependencies must be provided explicitly.
+After getting config file, just import it with wireguard client.
 
 ### Enjoy, please feel free to create Issues if you face some bugs or obstacles. 
