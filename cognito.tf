@@ -14,9 +14,9 @@ module "wg_cognito_user_pool" {
       allowed_oauth_flows_user_pool_client = true
       allowed_oauth_scopes                 = ["openid"]
       callback_urls                        = [
-        "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/cognito-auth-redirect"
+        try("${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/cognito-auth-redirect","")
       ]
-      default_redirect_uri                 = "${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/cognito-auth-redirect"
+      default_redirect_uri                 = try("${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/cognito-auth-redirect","")
       explicit_auth_flows                  = []
       generate_secret                      = true
       logout_urls                          = []
