@@ -50,7 +50,6 @@ def handler(event, context):
             user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)
             return (json.loads(user_ssm_params[0])['ClientConf'])
         else:
-            print("User {} not in group:{}".format(username, cognito_group))
-            return None
+            return "User {} not in group:{}".format(username, cognito_group)
     else:
         return (json.loads(user_ssm_params[0])['ClientConf'])
