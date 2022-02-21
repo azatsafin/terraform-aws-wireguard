@@ -1,5 +1,7 @@
 locals {
-  wg_cognito_user_pool_arn = var.cognito_user_pool_id != null ?  "arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${var.cognito_user_pool_id}" : module.wg_cognito_user_pool.arn
+  wg_cognito_user_pool_arn = var.cognito_user_pool_id != null ?  (
+  "arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${var.cognito_user_pool_id}" ) : (
+  try("arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${module.wg_cognito_user_pool.id}", "") )
 }
 resource "aws_iam_role" "create_user_conf" {
   name               = "${local.name}-create-user-conf"

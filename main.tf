@@ -37,6 +37,7 @@ locals {
 }
 
 resource "aws_iam_group" "wireguard" {
+  count = var.users_management_type == "iam" ? 1 : 0
   name  = var.wg_group_name
 }
 

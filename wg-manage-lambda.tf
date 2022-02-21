@@ -159,7 +159,7 @@ module "wg_manage_image" {
   source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : "${path.module}/lambdas/wg-manage-cognito"
 }
 
-data "aws_cognito_user_pool_clients" "cognito" {
-  count        = var.users_management_type == "cognito" ? 1 : 0
-  user_pool_id = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
-}
+#data "aws_cognito_user_pool_clients" "cognito" {
+#  count        = var.users_management_type == "cognito" ? 1 : 0
+#  user_pool_id = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
+#}

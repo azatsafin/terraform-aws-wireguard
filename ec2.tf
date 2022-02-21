@@ -159,7 +159,7 @@ Content-Disposition: attachment; filename="cloud-config.txt"
 
 #cloud-config
 cloud_final_modules:
-- [scripts-user, always]
+- [scripts-user]
 
 --//
 Content-Type: text/x-shellscript; charset="us-ascii"
@@ -181,7 +181,7 @@ sleep 20
 systemctl enable wg-quick@wg0.service
 systemctl start wg-quick@wg0.service
 systemctl status wg-quick@wg0.service
-rm /var/lib/cloud/instances/*/sem/config_scripts_user || true
+#rm /var/lib/cloud/instances/*/sem/config_scripts_user || true
 ###Setup script to reload WG config
 mkdir -p /var/usr/wg-check-reload
 cd /var/usr/wg-check-reload
@@ -227,13 +227,15 @@ Requires=wg-conf-check-reload.service
 
 [Timer]
 Unit=wg-conf-check-reload.service
-OnCalendar=*:0/5
+OnCalendar=*:0/1
 
 [Install]
 WantedBy=timers.target
 EOF
 systemctl daemon-reload
+systemctl enable wg-conf-check-reload.timer
 systemctl start wg-conf-check-reload.timer
+reboot
 EOT
 }
 

@@ -25,5 +25,5 @@ module "aws-wireguard" {
 }
 
 output "get_config_url" {
-  value = module.aws-wireguard.get_conf_url
+  value = module.aws-wireguard.get_conf_command
 }

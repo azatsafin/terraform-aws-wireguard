@@ -80,8 +80,8 @@ module "redirect_2cognito" {
   package_type          = "Zip"
   source_path           = "${path.module}/lambdas/redirect-2cognito"
   environment_variables = {
-    COGNITO_USER_POOL_CLIENT_ID = var.cognito_user_pool_id != null ? aws_cognito_user_pool_client.wg-vpn[0].id : data.aws_cognito_user_pool_clients.cognito[0].client_ids[0]
-    COGNITO_POOL_NAME = var.cognito_user_pool_id != null ? "kafka-ui" : "${local.name}-wg-user-pool" //this must be fixed because we explicitly set first part of cognito ui url
+    COGNITO_USER_POOL_CLIENT_ID = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : aws_cognito_user_pool_client.wg-vpn[0].id
+    COGNITO_POOL_NAME = var.cognito_user_pool_id != null ? var.project-name : "${local.name}-wg-user-pool"
     COGNITO_REGION = data.aws_region.current.name
   }
 }
