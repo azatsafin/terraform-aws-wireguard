@@ -42,6 +42,13 @@ resource "aws_iam_policy" "ec2_vpn_server_ssm" {
                 "logs:PutLogEvents"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Resource": "${module.wg_manage.lambda_function_arn}"
         }
     ]
 }
@@ -174,6 +181,7 @@ apt-get install -y awscli jq wireguard iptables
 sleep 5
 systemctl stop wg-quick@wg0.service
 REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
+aws --region=$REGION lambda invoke --function-name ${module.wg_manage.lambda_function_name} invoke-out.txt
 aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.Value > /etc/wireguard/wg0.conf
 sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 sysctl -p
@@ -235,7 +243,6 @@ EOF
 systemctl daemon-reload
 systemctl enable wg-conf-check-reload.timer
 systemctl start wg-conf-check-reload.timer
-reboot
 EOT
 }
 
