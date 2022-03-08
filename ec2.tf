@@ -199,7 +199,7 @@ cat > is_reload.sh << 'EOF'
 #Set period of time tolerant to config modification in seconds
 GRACE_PERIOD=100
 REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}')
-SSM_LAST_MODIFIED_TIME=$(aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.LastModifiedDate | sed -r  's/([0-9]+).([0-9]*)/\1/')
+SSM_LAST_MODIFIED_TIME=$(aws --region=$REGION ssm get-parameter --with-decryption --name "/wg/kafka-ui/wg-config" | jq -r .Parameter.LastModifiedDate | xargs -I {} date --date={} +"%s" )
 #echo "Last time config modified in SSM:"$SSM_LAST_MODIFIED_TIME
 LOCAL_LAST_MODIFIED_TIME=$(stat -c%Z /etc/wireguard/wg0.conf)
 #echo "Last time local config modification:"$LOCAL_LAST_MODIFIED_TIME
