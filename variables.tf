@@ -103,3 +103,24 @@ api gateway execution url "https://aws-generated-unic-name.execute-api.aws-regio
 to specify this domain name here and then add Custom Domain name in API Gateway settings.
 EOT
 }
+
+variable "use_existing_wg_manage_image" {
+  type  = bool
+  default = false
+  description = <<-EOT
+wg-manage-lambda function use custom docker image, this manage required because lambda use 'wg' shell commands
+you can build this image by yourself during 'terraform apply' operation
+or use existing image from docker.hub
+Such option can be required for CD process which not able to run `docker build` command
+EOT
+}
+
+variable "existing_wg_manage_iam_image_name" {
+  type = string
+  default = "azatsafin/wg-manage-iam:latest"
+}
+
+variable "existing_wg_manage_cognito_image_name" {
+  type = string
+  default = "azatsafin/wg-manage-cognito:latest"
+}
