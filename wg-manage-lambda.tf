@@ -1,12 +1,12 @@
 resource "aws_iam_role" "wg_manage" {
-  name               = "${local.name}-wg-manage"
+  name = "${local.name}-wg-manage"
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
-        Sid       = ""
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
         Principal = {
           Service = "lambda.amazonaws.com"
         }
@@ -125,9 +125,7 @@ module "wg_manage" {
   timeout         = 30
   lambda_role     = aws_iam_role.wg_manage.arn
   package_type    = "Image"
-  image_uri       = var.use_existing_wg_manage_image == true ?
-  var.users_management_type == "iam" ? var.existing_wg_manage_iam_image_name : var.existing_wg_manage_cognito_image_name :
-  module.wg_manage_image.image_uri
+  image_uri       = var.use_existing_wg_manage_image == true ? var.users_management_type == "iam" ? var.existing_wg_manage_iam_image_name : var.existing_wg_manage_cognito_image_name : module.wg_manage_image[0].image_uri
 
   environment_variables = {
     WG_SSM_USERS_PREFIX    = local.wg_ssm_user_prefix
@@ -145,7 +143,7 @@ module "wg_manage" {
     COGNITO_GROUP_NAME     = var.cognito_user_group
     COGNITO_USER_POOL_ID   = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
   }
-  allowed_triggers      = {
+  allowed_triggers = {
     AllowExecutionFromSNS = {
       principal  = "sns.amazonaws.com"
       source_arn = aws_sns_topic.wireguard_group_change_notification.arn
@@ -154,6 +152,7 @@ module "wg_manage" {
 }
 
 module "wg_manage_image" {
+  count           = var.use_existing_wg_manage_image == false ? 1 : 0
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
   create_ecr_repo = true
   ecr_repo        = "${local.name}-wg-manage"
@@ -161,7 +160,3 @@ module "wg_manage_image" {
   source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : "${path.module}/lambdas/wg-manage-cognito"
 }
 
-#data "aws_cognito_user_pool_clients" "cognito" {
-#  count        = var.users_management_type == "cognito" ? 1 : 0
-#  user_pool_id = var.cognito_user_pool_id != null ? var.cognito_user_pool_id : module.wg_cognito_user_pool.id
-#}

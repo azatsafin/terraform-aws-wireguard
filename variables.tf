@@ -5,30 +5,30 @@ This module support two user managment source, IAM and Cognito
 IAM is more usable for the infrastructure teams, where all members already have IAM user
 Cognito is more usable for the teams who would like to manage VPN outside of IAM, and it more user friendly
 EOT
-  type = string
+  type        = string
 }
 
 variable "cognito_user_pool_id" {
-  default = null
-  type = string
+  default     = null
+  type        = string
   description = "If you already have existing Cognito user pool, please provide it id, otherwise new pool will be created"
 }
 
 variable "cognito_user_group" {
-  default = "vpn"
-  type = string
+  default     = "vpn"
+  type        = string
   description = "Only members on this group will have vpn access, default members will not be able to receive config/use vpn"
 }
 
 variable "instance_type" {
   default     = "t3.small"
   description = "Instance type which will be used by Wireguard VPN server, please note - it should have enhanced network support"
-  type = string
+  type        = string
 }
 
 variable "wg_group_name" {
-  default = "wireguard"
-  type    = string
+  default     = "wireguard"
+  type        = string
   description = "AWS IAM group name, members of that group will be members of wireguard server"
 }
 
@@ -45,7 +45,7 @@ variable "aws_ec2_key" {
 
 variable "project-name" {
   default = "vpn-service"
-  type = string
+  type    = string
 }
 
 variable "prefix" {
@@ -56,36 +56,36 @@ variable "prefix" {
 variable "vpc_cidr" {
   default     = "10.11.0.0/16"
   description = "The CIDR of VPC, specify if you wish create VPC with specific CIDR"
-  type = string
+  type        = string
 }
 
 variable "vpc_id" {
   default     = null
   description = "VPC ID, must be provided if you want to deploy Wireguard server in existing VPC"
-  type = string
+  type        = string
 }
 
 variable "wireguard_subnet" {
   default     = "10.11.0.0/24"
   description = "Subnet ID where wireguard server and management lambdas will be deployed"
-  type = string
+  type        = string
 }
 
 variable "vpn_subnet" {
   default     = "10.111.111.0/24"
   description = "VPN subnet, VPN clients will get internal IPs from this subnet"
-  type = string
+  type        = string
 }
 
 variable "wg_routed_subnets" {
-  default = "0.0.0.0/0"
+  default     = "0.0.0.0/0"
   description = "Comma separated list of subnets to which client can send traffic trough VPN"
-  type = string
+  type        = string
 }
 
 variable "wg_admin_email" {
-  default = null
-  type = string
+  default     = null
+  type        = string
   description = <<-EOT
 If specified, this email will receive  wireguard configurations for all clients.
 Configurations will be send by AWS SES. Please make sure that SES out of sandbox or admin email verified.
@@ -93,8 +93,8 @@ EOT
 }
 
 variable "cognito_call_back_app_url" {
-  default = null
-  type = string
+  default     = null
+  type        = string
   description = <<-EOT
 You can set your own domain name for call back url in cognito app client settings.
 It's not required to touch this if you don't use your own domain name or your own application.
@@ -105,8 +105,8 @@ EOT
 }
 
 variable "use_existing_wg_manage_image" {
-  type  = bool
-  default = false
+  type        = bool
+  default     = false
   description = <<-EOT
 wg-manage-lambda function use custom docker image, this manage required because lambda use 'wg' shell commands
 you can build this image by yourself during 'terraform apply' operation
@@ -116,11 +116,11 @@ EOT
 }
 
 variable "existing_wg_manage_iam_image_name" {
-  type = string
+  type    = string
   default = "azatsafin/wg-manage-iam:latest"
 }
 
 variable "existing_wg_manage_cognito_image_name" {
-  type = string
+  type    = string
   default = "azatsafin/wg-manage-cognito:latest"
 }
