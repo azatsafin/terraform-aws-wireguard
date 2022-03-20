@@ -177,9 +177,11 @@ Content-Disposition: attachment; filename="userdata.txt"
 #!/usr/bin/bash
 set -x
 apt-get update
-apt-get install -y awscli jq wireguard iptables
-sleep 5
+apt-get install -y jq wireguard iptables zip
 systemctl stop wg-quick@wg0.service
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
 REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
 aws --region=$REGION lambda invoke --function-name ${module.wg_manage.lambda_function_name} invoke-out.txt
 aws --region=$REGION ssm get-parameter --with-decryption --name "${local.wg_ssm_config}" | jq -r .Parameter.Value > /etc/wireguard/wg0.conf
