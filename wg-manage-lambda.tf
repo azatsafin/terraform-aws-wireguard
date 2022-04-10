@@ -155,8 +155,8 @@ module "wg_manage_image" {
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
   create_ecr_repo = true
   ecr_repo        = "${local.name}-wg-manage"
-  image_tag       = var.users_management_type == "iam" ? filesha256("${path.module}/lambdas/wg-manage-iam/app.py") : filesha256("${path.module}/lambdas/wg-manage-cognito/app.py")
-  source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : "${path.module}/lambdas/wg-manage-cognito"
+  image_tag       = var.users_management_type == "iam" ? filesha256("${path.cwd}/lambdas/wg-manage-iam/app.py") : filesha256("${path.cwd}/lambdas/wg-manage-cognito/app.py")
+  source_path     = var.users_management_type == "iam" ? "${path.cwd}/lambdas/wg-manage-iam" : "${path.cwd}/lambdas/wg-manage-cognito"
 }
 
 #data "aws_cognito_user_pool_clients" "cognito" {
