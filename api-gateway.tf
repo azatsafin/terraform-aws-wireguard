@@ -14,7 +14,7 @@ module "api_gateway_iam" {
 
   integrations = {
     "GET /wg-conf-iam" = {
-      lambda_arn             = module.create_user_conf.lambda_function_arn
+      lambda_arn             = module.create_user_conf[0].lambda_function_arn
       payload_format_version = "2.0"
       authorization_type     = "AWS_IAM"
     }
@@ -36,7 +36,7 @@ module "api_gateway_cognito" {
 
   integrations = {
     "GET /wg-conf-cognito"       = {
-      lambda_arn             = module.create_user_conf.lambda_function_arn
+      lambda_arn             = module.create_user_conf[0].lambda_function_arn
       payload_format_version = "2.0"
       authorization_type     = "JWT"
       integration_type       = "AWS_PROXY"
@@ -71,6 +71,7 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
 }
 
 resource "aws_lambda_permission" "create_user_conf" {
+  count = var.users_management_type == "iam" ||  var.users_management_type == "cognito" ? 1 : 0
   statement_id  = "AllowAPIInvoke"
   action        = "lambda:InvokeFunction"
   function_name = "${local.name}-create-user-conf"

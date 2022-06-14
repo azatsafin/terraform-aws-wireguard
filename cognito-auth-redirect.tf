@@ -45,7 +45,7 @@ resource "aws_iam_role_policy_attachment" "cognito_auth_redirect" {
 module "cognito_auth_redirect" {
   count           = var.users_management_type == "cognito" ? 1 : 0
   source          = "terraform-aws-modules/lambda/aws"
-  version         = "2.7.0"
+  version         = "v3.2.1"
   create_package  = true
   create_role     = false
   create          = true

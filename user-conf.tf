@@ -3,6 +3,7 @@ locals {
   "arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${var.cognito_user_pool_id}" ) : (
   try("arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:userpool/${module.wg_cognito_user_pool.id}", "") )
 }
+
 resource "aws_iam_role" "create_user_conf" {
   name               = "${local.name}-create-user-conf"
   assume_role_policy = jsonencode({
@@ -21,7 +22,7 @@ resource "aws_iam_role" "create_user_conf" {
 }
 
 resource "aws_iam_policy" "create_user_conf" {
-  name = "${local.name}-create_user_conf"
+  name   = "${local.name}-create_user_conf"
   policy = <<POLICY
 {
 "Version": "2012-10-17",
@@ -80,7 +81,7 @@ resource "aws_iam_role_policy_attachment" "create_user_conf" {
 }
 
 resource "aws_iam_policy" "get_config_cognito" {
-  name = "${local.name}-get_config_cognito"
+  name   = "${local.name}-get_config_cognito"
   count  = var.users_management_type == "cognito" ? 1 : 0
   policy = <<POLICY
 {
@@ -112,6 +113,7 @@ resource "aws_iam_role_policy_attachment" "get_config_cognito" {
 }
 
 module "create_user_conf" {
+  count                 = var.users_management_type != "custom_api_authorizer" ? 1 : 0
   source                = "terraform-aws-modules/lambda/aws"
   version               = "2.7.0"
   create_package        = true

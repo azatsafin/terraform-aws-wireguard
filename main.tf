@@ -6,6 +6,21 @@ data "aws_availability_zones" "available" {
 
 #This provider will be used to configure EventBridge,
 # EventBridge consume CloudWatch events from region where IAM events logged, send them to SNS->Lambda
+terraform {
+  required_version = ">= 0.13.1"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.35"
+    }
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.16.0"
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
   alias  = "us-east-1"
@@ -62,3 +77,12 @@ module "vpc" {
   manage_default_security_group  = false
 }
 
+data "aws_ecr_authorization_token" "token" {}
+
+provider "docker" {
+  registry_auth {
+    address  = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.current.account_id, data.aws_region.current.name)
+    username = data.aws_ecr_authorization_token.token.user_name
+    password = data.aws_ecr_authorization_token.token.password
+  }
+}

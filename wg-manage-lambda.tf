@@ -111,7 +111,7 @@ resource "aws_iam_role_policy_attachment" "wg_manage_cognito" {
 }
 
 module "wg_manage" {
-  handler         = var.users_management_type == "iam" ? "app.handler" : "cognito_app.handler"
+  handler         = "app.handler"
   source          = "terraform-aws-modules/lambda/aws"
   version         = "2.7.0"
   create_package  = false
@@ -153,11 +153,13 @@ module "wg_manage" {
 
 module "wg_manage_image" {
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
+  version         = "v3.2.1"
   create_ecr_repo = true
   ecr_repo        = "${local.name}-wg-manage"
-  image_tag       = var.users_management_type == "iam" ? filesha256("${path.module}/lambdas/wg-manage-iam/app.py") : filesha256("${path.module}/lambdas/wg-manage-cognito/app.py")
-  source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : "${path.module}/lambdas/wg-manage-cognito"
+  image_tag       = var.users_management_type == "iam" ? filesha256("${path.module}/lambdas/wg-manage-iam/app.py") : (var.users_management_type == "cognito" ? filesha256("${path.module}/lambdas/wg-manage-cognito/app.py") :  filesha256("${path.module}/lambdas/wg-manage-github/app.py"))
+  source_path     = var.users_management_type == "iam" ? "${path.module}/lambdas/wg-manage-iam" : (var.users_management_type == "cognito" ? "${path.module}/lambdas/wg-manage-cognito" : "${path.module}/lambdas/wg-manage-github")
 }
+
 
 #data "aws_cognito_user_pool_clients" "cognito" {
 #  count        = var.users_management_type == "cognito" ? 1 : 0

@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  WGManageGitHub:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      Runtime: python3.9
+      Timeout: 10
+      PackageType: Image
+      Environment:
+        Variables:
+          WG_SSM_USERS_PREFIX: "/github/vpn-demo/users"
+          WG_SUBNET: '10.111.111.0/24'
+          WG_SSM_CONFIG_PATH: '/github/vpn-demo/wg-config'
+          WG_LISTEN_PORT: '51820'
+          WG_PUBLIC_IP: '3.111.111.111'
+          VPC_CIDR: '10.11.0.0/16'
+          WG_ROUTED_SUBNETS: '0.0.0.0/0'
+    Metadata:
+      Dockerfile: Dockerfile

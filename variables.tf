@@ -103,3 +103,23 @@ api gateway execution url "https://aws-generated-unic-name.execute-api.aws-regio
 to specify this domain name here and then add Custom Domain name in API Gateway settings.
 EOT
 }
+
+variable "oauth2_client_id" {
+  type = string
+  description = "oAuth2 client id"
+}
+
+variable "oauth2_client_secret" {
+  type = string
+  description = "oAuth2 client secret"
+}
+
+variable "github_org_name" {
+  type = string
+  description = "if you use custom authorizer with github, please provide github org name"
+}
+
+variable "wg_manage_docker_uri" {
+  type = string
+  default = "account_id.dkr.ecr.eu-central-1.amazonaws.com/ecr_name:tag"
+}
