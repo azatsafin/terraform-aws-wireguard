@@ -248,7 +248,7 @@ def handler(event, context):
             Value="{}".format("\n".join(wg_conf_new.lines)),
             Type='SecureString',
             Overwrite=True,
-            Tier='Standard',
+            Tier='Advanced',
             DataType='text'
         )
     #Old method to update config, you can prefer to use it if you require immediate config update but tolerate instance restart,
