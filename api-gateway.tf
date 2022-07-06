@@ -1,7 +1,7 @@
 module "api_gateway_iam" {
   count  = var.users_management_type == "iam" ? 1 : 0
   source = "terraform-aws-modules/apigateway-v2/aws"
-
+  version = "1.8.0"
   name                   = "${local.name}-get-conf"
   description            = "API for getting wg config"
   protocol_type          = "HTTP"
@@ -24,6 +24,7 @@ module "api_gateway_iam" {
 module "api_gateway_cognito" {
   count                  = var.users_management_type == "cognito" ? 1 : 0
   source                 = "terraform-aws-modules/apigateway-v2/aws"
+  version = "1.8.0"
   name                   = "${local.name}-get-conf"
   description            = "API for getting wg config"
   protocol_type          = "HTTP"
