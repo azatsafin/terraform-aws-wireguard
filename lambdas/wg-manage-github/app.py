@@ -169,6 +169,10 @@ def get_wg_config():
 
 
 def handler(event, context):
+    if not event['action'] and not event['user']:
+        return {
+            "Error": "missing required request params"
+        }
     if event['login']:
         user_login = event['login']
         ssm_user = get_ssm_attrs(user_ssm_prefix + "/" + user_login)

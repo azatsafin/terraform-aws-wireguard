@@ -24,23 +24,27 @@ def get_ssm_attrs(ssm_path):
     else:
         return None
 
+
 def handler(event, context):
     # Getting caller identity
     try:
         username = event['requestContext']['authorizer']['lambda']['login']
     except Exception as e:
-        print(e)
+        print(e.__str__())
         return ("can't get caller identity, error: {}".format(str(e)))
     # Check that config exist and user in VPN group, if so then call lambda function to create user wg config
     user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)
+    print(json.dumps(event['requestContext']['authorizer']['lambda']))
     if user_ssm_params is not None:
         return (json.loads(user_ssm_params[0])['ClientConf'])
     else:
         try:
             response = aws_lambda.invoke(FunctionName=wg_manage_function_name, InvocationType="RequestResponse",
-                                         Payload=json.dumps(event['requestContext']['authorizer']['lambda']))
+                                         Payload=json.dumps({"action": "add",
+                                                             "user": event['requestContext']['authorizer']['lambda']}))
+
         except Exception as e:
-            print(e)
+            print(e.__str__())
 
         if response['StatusCode'] == 200:
             user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)
@@ -48,4 +52,3 @@ def handler(event, context):
                 return (json.loads(user_ssm_params[0])['ClientConf'])
         else:
             return {"Error": "Something went wrong, user config could not be created"}
-
