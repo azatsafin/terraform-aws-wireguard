@@ -98,13 +98,11 @@ def add_users_to_wg_config(wg_conf, users):
         wg_conf.add_attr(wgexec.get_publickey(peer_conf['private_key']), 'AllowedIPs', peer_conf['address'] + "/32")
     return wg_conf
 
-#def remove_users(users):
-#    for user in users:
-#        print("Removing ssm param for user:{}".format(user))
-#        aws_ssm.delete_parameter(Name=user_ssm_prefix + "/" + user)
-#        private_key = wgexec.generate_privatekey()
-#        address = available_ips.pop()
-#    return True
+def remove_users(users):
+    for user in users:
+        print("Removing ssm param for user:{}".format(user))
+        aws_ssm.delete_parameter(Name=user_ssm_prefix + "/" + user)
+    return True
 
 
 def free_ip(remaining_users):
@@ -169,37 +167,38 @@ def get_wg_config():
 
 
 def handler(event, context):
-    if not event['action'] and not event['user']:
+    print(event)
+    if not event['action'] or not event['user'] or not event['user']['login']:
         return {
             "Error": "missing required request params"
         }
-    if event['login']:
-        user_login = event['login']
-        ssm_user = get_ssm_attrs(user_ssm_prefix + "/" + user_login)
-        if ssm_user is None:
-            print("Users to add:{}".format(user_login))
-            wg_conf = get_wg_config()
-            ssm = get_existing_users()
-            if add_user(ssm, user_login, wg_conf):
-                wg_conf_new = add_users_to_wg_config(wg_conf, [user_login])
-                aws_ssm.put_parameter(
-                    Name=wg_config_ssm_path,
-                    Description='Wireguard server conf',
-                    Value="{}".format("\n".join(wg_conf_new.lines)),
-                    Type='SecureString',
-                    Overwrite=True,
-                    Tier='Standard',
-                    DataType='text'
-                )
-            else:
-                return {
-                    "Error": "can't add user:{}".format(user_login)
-                }
+    wg_conf = get_wg_config()
+    ssm = get_existing_users()
+    user_login = event['user']['login']
+    if event['action'] == 'member_added':
+        print("Users to add:{}".format(user_login))
+        if add_user(ssm, user_login, wg_conf):
+            ssm.append(user_login)
         else:
             return {
-                "Error": "User:{} already exist".format(user_login)
+                "Error": "can't add user:{}".format(user_login)
             }
+    elif event['action'] == 'member_removed' or event['action'] == 'deleted':
+        if remove_users([user_login]):
+            ssm.remove(user_login)
+    elif event['action'] == 'renamed':
+        print("need to add rename function")
     else:
         return {
-            "Error": "Payload don't have github_login field"
+            "Error": "User:{} already exist".format(user_login)
         }
+    wg_conf_new = add_users_to_wg_config(wg_conf, ssm)
+    aws_ssm.put_parameter(
+        Name=wg_config_ssm_path,
+        Description='Wireguard server conf',
+        Value="{}".format("\n".join(wg_conf_new.lines)),
+        Type='SecureString',
+        Overwrite=True,
+        Tier='Standard',
+        DataType='text'
+    )

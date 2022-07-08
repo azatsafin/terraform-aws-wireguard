@@ -20,15 +20,22 @@ module "aws-wireguard" {
   prefix                = "github"
   project-name          = "vpn-demo"
   users_management_type = "custom_api_authorizer"
-  github_org_name       = "provectus"
+  github_org_name       = "azat-safin"
   oauth2_client_id      = var.client_id
   oauth2_client_secret  = var.client_secret
+  github_webhook_secret = var.github_webhook_secret
 }
 
 output "get_config_url" {
   value = module.aws-wireguard.get_conf_command
 }
 
+output "webhook_url" {
+  value = module.aws-wireguard.webhook_url
+}
+
 variable "client_id" {}
 
 variable "client_secret" {}
+
+variable "github_webhook_secret" {}

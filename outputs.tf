@@ -5,3 +5,7 @@ output "get_conf_command" {
           "python3 ./scripts/apigateway-invoke.py ${module.api_gateway_iam[0].apigatewayv2_api_api_endpoint}/wg-conf-iam > wg-conf.conf") : (
     "open ${module.api_gateway_cognito[0].apigatewayv2_api_api_endpoint}/config")) : "open ${module.api-gateway-custom-authorizer[0].oauth2_login}"
 }
+
+output "webhook_url" {
+  value = var.users_management_type == "custom_api_authorizer" ? module.webhook_2_sns[0].webhook_api_url : null
+}

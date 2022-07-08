@@ -123,3 +123,8 @@ variable "wg_manage_docker_uri" {
   type = string
   default = "account_id.dkr.ecr.eu-central-1.amazonaws.com/ecr_name:tag"
 }
+
+variable "github_webhook_secret" {
+  type = string
+  description = "github webhook secret used to encrypt payload"
+}

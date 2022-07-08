@@ -7,7 +7,7 @@ from botocore.config import Config
 
 user_ssm_prefix = os.getenv('WG_SSM_USERS_PREFIX')
 
-boto3_conf = Config(read_timeout=5, retries={"total_max_attempts": 2})
+boto3_conf = Config(read_timeout=30, retries={"total_max_attempts": 1})
 aws_lambda = boto3.client('lambda', config=boto3_conf)
 aws_ssm = boto3.client('ssm', config=boto3_conf)
 wg_manage_function_name = os.getenv('WG_MANAGE_FUNCTION_NAME')
@@ -40,11 +40,11 @@ def handler(event, context):
     else:
         try:
             response = aws_lambda.invoke(FunctionName=wg_manage_function_name, InvocationType="RequestResponse",
-                                         Payload=json.dumps({"action": "add",
+                                         Payload=json.dumps({"action": "member_added", "source": "github",
                                                              "user": event['requestContext']['authorizer']['lambda']}))
-
         except Exception as e:
             print(e.__str__())
+            return {"Error": "wg-manage invocation take to much time"}
 
         if response['StatusCode'] == 200:
             user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)

@@ -115,7 +115,7 @@ resource "aws_iam_role_policy_attachment" "get_config_cognito" {
 module "create_user_conf" {
   count                 = var.users_management_type != "custom_api_authorizer" ? 1 : 0
   source                = "terraform-aws-modules/lambda/aws"
-  version               = "2.7.0"
+  version               = "3.2.1"
   create_package        = true
   create_role           = false
   create                = true

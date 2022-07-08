@@ -6,7 +6,7 @@ import ipaddress
 import json
 from botocore.config import Config
 
-boto3_conf = Config(read_timeout=10, retries={"total_max_attempts": 2})
+boto3_conf = Config(read_timeout=30, retries={"total_max_attempts": 1})
 aws_iam = boto3.client('iam', config=boto3_conf)
 aws_ssm = boto3.client('ssm', config=boto3_conf)
 aws_ec2 = boto3.client('ec2', config=boto3_conf)
