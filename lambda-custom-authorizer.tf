@@ -1,6 +1,6 @@
  module "api-gateway-custom-authorizer" {
   count                          = var.users_management_type == "custom_api_authorizer" ? 1 : 0
-  source                         = "../aws-github-custom-authorizer/terraform"
+  source                         = "git::https://github.com/azatsafin/aws-github-custom-authorizer?ref=v0.0.1"
   resource_name_prefix           = local.name
   client_id                      = var.oauth2_client_id
   client_secret                  = var.oauth2_client_secret
