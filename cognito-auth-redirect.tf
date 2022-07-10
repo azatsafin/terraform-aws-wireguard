@@ -65,7 +65,7 @@ module "cognito_auth_redirect" {
 module "redirect_2cognito" {
   count                 = var.users_management_type == "cognito" ? 1 : 0
   source                = "terraform-aws-modules/lambda/aws"
-  version               = "2.7.0"
+  version               = "3.2.1"
   create_package        = true
   create_role           = true
   create                = true
