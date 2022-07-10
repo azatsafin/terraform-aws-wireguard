@@ -28,12 +28,12 @@ def get_ssm_attrs(ssm_path):
 def handler(event, context):
     # Getting caller identity
     try:
-        username = event['requestContext']['authorizer']['lambda']['login']
+        user_id = str(event['requestContext']['authorizer']['lambda']['id'])
     except Exception as e:
         print(e.__str__())
         return ("can't get caller identity, error: {}".format(str(e)))
     # Check that config exist and user in VPN group, if so then call lambda function to create user wg config
-    user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)
+    user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + user_id)
     print(json.dumps(event['requestContext']['authorizer']['lambda']))
     if user_ssm_params is not None:
         return (json.loads(user_ssm_params[0])['ClientConf'])
@@ -47,7 +47,7 @@ def handler(event, context):
             return {"Error": "wg-manage invocation take to much time"}
 
         if response['StatusCode'] == 200:
-            user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + username)
+            user_ssm_params = get_ssm_attrs(user_ssm_prefix + "/" + user_id)
             if user_ssm_params is not None:
                 return (json.loads(user_ssm_params[0])['ClientConf'])
         else:

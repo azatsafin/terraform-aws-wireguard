@@ -15,7 +15,7 @@ def handler(event, context):
     message = json.loads(message)
     print(message)
     if message['action'] in github_organization_process_events:
-        payload = {"action": message['action'], "user": {"login": message['membership']['user']['login']}}
+        payload = {"action": message['action'], "user": message['membership']['user']}
         aws_lambda.invoke(FunctionName=wg_manage_lambda, Payload=bytes(json.dumps(payload), encoding='utf8'))
 
     return None

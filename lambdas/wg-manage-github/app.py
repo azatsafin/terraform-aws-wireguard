@@ -59,8 +59,8 @@ def get_existing_users():
     return get_next_item(None)
 
 
-def add_user(ssm_users, user_name, wg_conf):
-    if user_name not in ssm_users:
+def add_user(ssm_users, user, wg_conf):
+    if user['id'] not in ssm_users:
         existing_users = set(ssm_users)
         available_ips = free_ip(existing_users)
         private_key = wgexec.generate_privatekey()
@@ -68,7 +68,7 @@ def add_user(ssm_users, user_name, wg_conf):
         server_public_key = wgexec.get_publickey(wg_conf.interface['PrivateKey'])
         user_conf = {"address": ip_address.__str__(), "private_key": private_key,
                      "public_key": wgexec.get_publickey(private_key)}
-        wg_conf_user = wgconfig.WGConfig(user_name)
+        wg_conf_user = wgconfig.WGConfig(str(user['id']) + "/" + user['login'])
         wg_conf_user.add_attr(None, 'PrivateKey', private_key)
         wg_conf_user.add_attr(None, 'Address', ip_address.__str__() + "/32")
         wg_conf_user.add_attr(None, 'DNS', (ipaddress.IPv4Network(wg_subnet).network_address + 1).__str__())
@@ -78,8 +78,8 @@ def add_user(ssm_users, user_name, wg_conf):
         wg_conf_user.add_attr(server_public_key, 'Endpoint', str(wg_public_ip) + ":" + wg_listen_port)
         user_conf["ClientConf"] = "{}".format("\n".join(wg_conf_user.lines))
         new_ssm_param = aws_ssm.put_parameter(
-            Name=user_ssm_prefix + "/" + user_name,
-            Description='Wireguard peer conf for user:{}'.format(user_name),
+            Name=user_ssm_prefix + "/" + str(user['id']),
+            Description='Wireguard peer conf for user:{}'.format(str(user['id']) + "/" + user['login']),
             Value=json.dumps(user_conf),
             Type='SecureString',
             Overwrite=True,
@@ -167,30 +167,27 @@ def get_wg_config():
 
 
 def handler(event, context):
-    print(event)
-    if not event['action'] or not event['user'] or not event['user']['login']:
+    if not event['action'] or not event['user'] or not event['user']['id']:
         return {
             "Error": "missing required request params"
         }
     wg_conf = get_wg_config()
     ssm = get_existing_users()
-    user_login = event['user']['login']
+    user = event['user']
     if event['action'] == 'member_added':
-        print("Users to add:{}".format(user_login))
-        if add_user(ssm, user_login, wg_conf):
-            ssm.append(user_login)
+        print("Users to add:{}".format(user))
+        if add_user(ssm, user, wg_conf):
+            ssm.append(str(user['id']))
         else:
             return {
-                "Error": "can't add user:{}".format(user_login)
+                "Error": "can't add user:{}".format(user)
             }
-    elif event['action'] == 'member_removed' or event['action'] == 'deleted':
-        if remove_users([user_login]):
-            ssm.remove(user_login)
-    elif event['action'] == 'renamed':
-        print("need to add rename function")
+    elif event['action'] == 'member_removed':
+        if remove_users([str(user['id'])]):
+            ssm.remove(str(user['id']))
     else:
         return {
-            "Error": "User:{} already exist".format(user_login)
+            "Error": "User:{} already exist".format(user)
         }
     wg_conf_new = add_users_to_wg_config(wg_conf, ssm)
     aws_ssm.put_parameter(
