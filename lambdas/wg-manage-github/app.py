@@ -196,6 +196,6 @@ def handler(event, context):
         Value="{}".format("\n".join(wg_conf_new.lines)),
         Type='SecureString',
         Overwrite=True,
-        Tier='Standard',
+        Tier='Advanced',
         DataType='text'
     )
