@@ -52,3 +52,4 @@ The same as above, but manage VPN user based on IAM group membership. To get Wir
 After getting config file, just import it with wireguard client.
 
 ### Enjoy, please feel free to create Issues if you face some bugs or obstacles. 
+# test
